@@ -1,0 +1,386 @@
+%% \PassOptionsToPackage{hidelinks,unicode}{hyperref} % Example options
+
+%%%%%%%%% PACKAGES
+
+\usepackage{booktabs}     % for nice horizontal lines
+%\usepackage{caption}
+
+% --- Preamble (place in your preamble) ---
+% \usepackage[switch]{lineno} 
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{placeins} % for \FloatBarrier to control float placement
+\usepackage{float}     % for [H] exact float placement
+% Independent "Listing N" float with a two-column (starred) variant for the
+% motivating-example diff. newfloat only needs keyval, so it does not pull in
+% the caption package (which conflicts with acmart).
+\usepackage{newfloat}
+\DeclareFloatingEnvironment[name=Listing, fileext=lol, placement=tbp, within=none]{listing}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable,listings}
+\usepackage{listings}
+\usepackage{xcolor}  % table option passed via \PassOptionsToPackage in main.tex
+\usepackage{array}
+% Listings styles
+\lstdefinestyle{code}{
+  basicstyle=\ttfamily\small,
+  numbers=left, numberstyle=\scriptsize, numbersep=6pt,
+  breaklines=true, breakatwhitespace=true,
+  frame=single, framerule=0.4pt,
+  tabsize=2, showstringspaces=false
+}
+\lstdefinestyle{cpp}{style=code, language=C++}
+\lstdefinestyle{json}{style=code, language=}
+\lstdefinestyle{txt}{style=code, language=}
+
+% Ensure circled step numbers in listings render reliably
+% Maps Unicode circled digits to the TikZ-based \circled{n} macro
+\lstset{literate=
+  {❶}{{\circled{1}}}1
+  {❷}{{\circled{2}}}1
+  {❸}{{\circled{3}}}1
+  {❹}{{\circled{4}}}1
+  {❺}{{\circled{5}}}1
+  {❻}{{\circled{6}}}1
+  {❼}{{\circled{7}}}1
+}
+
+% A reusable “code card” environment
+\newtcblisting{codecard}[2][]{%
+  enhanced, breakable,
+  colback=white, colframe=black!12,
+  boxrule=0.6pt, arc=2mm, left=1mm, right=1mm, top=1mm, bottom=1mm,
+  title={#2}, fonttitle=\bfseries\footnotesize,
+  listing only, listing options={#1}
+}
+
+% --- GitHub-style split-diff support (used in the Motivating Example) ---------
+% Per-cell background highlighting via colortbl's \cellcolor (loaded explicitly
+% here: the class loads xcolor *without* the table option, so \cellcolor/\rowcolor
+% are otherwise undefined). Code is typeset with \lstinline so quotes/brackets
+% stay verbatim-safe.
+\usepackage{colortbl}
+\definecolor{diffadd}{RGB}{225,251,231}   % GitHub-ish light green (added)
+\definecolor{diffdel}{RGB}{255,233,232}   % GitHub-ish light red   (removed)
+% Minimal Swift language (listings has no built-in Swift definition)
+\lstdefinelanguage{Swift}{%
+  morekeywords={func,let,var,while,for,in,if,else,guard,return,true,false,nil},
+  sensitive=true, morestring=[b]", morecomment=[l]{//}}
+% Compact inline style for the diff cells; long UI-locator lines need it small.
+\lstdefinestyle{swiftmini}{%
+  basicstyle=\ttfamily\scriptsize, columns=fullflexible, keepspaces=true,
+  language=Swift, keywordstyle=\bfseries\color{blue!60!black},
+  literate={"}{{\textquotedbl}}1}
+% +/- gutter glyphs and the gray line-number cell
+\newcommand{\gplus}{\textcolor{green!55!black}{\ttfamily\scriptsize +}}
+\newcommand{\gminus}{\textcolor{red!70!black}{\ttfamily\scriptsize $-$}}
+\newcommand{\dnum}[1]{\textcolor{black!40}{\ttfamily\scriptsize #1}}
+% Shorthand: shade the three cells of one diff half-row (color, then lineno/gutter/code)
+\newcommand{\dadd}{\cellcolor{diffadd}}
+\newcommand{\ddel}{\cellcolor{diffdel}}
+% Code cell + keyword: \lstinline cannot be used here because colortbl/array
+% re-scans cells and breaks its verbatim catcodes, so we typeset code as plain
+% monospace (T1 renders ", [, ], <, > correctly; ~ gives visible indentation).
+\newcommand{\cd}[1]{{\ttfamily\scriptsize\strut #1}}
+\newcommand{\kw}[1]{\textcolor{blue!60!black}{\textbf{#1}}}
+% One full diff line in a single (optionally shaded) cell, so the line number,
+% the +/- gutter, and the code share one continuous background. Fixed-width
+% \makebox keeps the columns aligned and guarantees the gap after the number.
+% #1=row color, #2=line number, #3=gutter glyph (\gplus/\gminus or empty), #4=code
+\newcommand{\diffline}[4]{%
+  \cellcolor{#1}\makebox[1.3em][r]{\dnum{#2}}\hspace{8pt}%
+  \makebox[0.6em][c]{#3}\hspace{6pt}\cd{#4}}
+
+
+
+%% \usepackage{soul}
+% xcolor is loaded by the class with the 'table' option (now explicitly loaded above)
+\usepackage{tabularx}
+%% %% Custom packages end here
+
+%% \usepackage{cite}
+%% \usepackage{amsmath}
+%% \usepackage{booktabs}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{enumitem}
+%% \usepackage{color}
+\usepackage{listings}
+%% \usepackage{graphicx}
+%% \usepackage{rotate}
+%% %% \usepackage{url}
+%% %\usepackage[hidelinks]{hyperref}
+%% \usepackage{breakurl}
+%% \usepackage{flushend}
+\usepackage{xspace}
+%% \usepackage[round-mode=places,round-precision=1,group-separator={,},group-minimum-digits={3},output-decimal-marker={.}, round-pad=false, exponent-mode = threshold, exponent-thresholds = -3:5, tight-spacing=true]{siunitx}
+\usepackage{subcaption}
+%\usepackage{pgf-pie}
+%% \usepackage{bbding}
+\usepackage{pifont}
+%% \usepackage{seqsplit}
+%% \usepackage{pgfplots}
+%% \pgfplotsset{width=7cm,compat=1.8}
+%% \usepackage{datetime2}
+
+%% % Tikz Figs
+\usepackage{tikz}
+\tikzset{>=latex}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds,calc} % for flow diagrams and icon pics
+
+%%%%%%%%%
+% ---------- Icon pics (line-art, ~0.5 cm) ----------
+\tikzset{
+  ic/.style={line width=0.6pt, line cap=round, line join=round},
+  pics/play/.style={code={
+    \draw[ic] (0,0) circle (0.26);
+    \fill (-0.08,-0.13) -- (-0.08,0.13) -- (0.16,0) -- cycle;
+  }},
+  pics/search/.style={code={
+    \draw[ic] (0.03,0.06) circle (0.16);
+    \draw[ic] (-0.09,-0.06) -- (-0.22,-0.19);
+  }},
+  pics/bug/.style={code={
+    \draw[ic] (0,0) ellipse (0.15 and 0.21);
+    \draw[ic] (0,0.21) -- (0,0.30);
+    \draw[ic] (0,0.30) circle (0.07);
+    \draw[ic] (-0.04,0.36) -- (-0.09,0.43);
+    \draw[ic] (0.04,0.36) -- (0.09,0.43);
+    \foreach \y in {0.10,0,-0.10}{
+      \draw[ic] (-0.13,\y) -- (-0.26,\y+0.05);
+      \draw[ic] (0.13,\y) -- (0.26,\y+0.05);
+    }
+  }},
+  pics/shield/.style={code={
+    \draw[ic] (0,0.24) -- (-0.17,0.17) -- (-0.17,-0.07)
+      .. controls (-0.17,-0.20) and (-0.07,-0.28) .. (0,-0.30)
+      .. controls (0.07,-0.28) and (0.17,-0.20) .. (0.17,-0.07)
+      -- (0.17,0.17) -- cycle;
+    \draw[ic] (-0.08,0.0) -- (-0.02,-0.08) -- (0.10,0.10);
+  }},
+  pics/funnel/.style={code={
+    \draw[ic] (-0.22,0.20) -- (0.22,0.20) -- (0.05,-0.05) -- (0.05,-0.22)
+      -- (-0.05,-0.22) -- (-0.05,-0.05) -- cycle;
+  }},
+  pics/db/.style={code={
+    \draw[ic] (-0.16,0.18) arc (180:360:0.16 and 0.07);
+    \draw[ic] (-0.16,0.18) arc (180:0:0.16 and 0.07);
+    \draw[ic] (-0.16,0.18) -- (-0.16,-0.18);
+    \draw[ic] (0.16,0.18) -- (0.16,-0.18);
+    \draw[ic] (-0.16,0.0) arc (180:360:0.16 and 0.07);
+    \draw[ic] (-0.16,-0.18) arc (180:360:0.16 and 0.07);
+  }},
+  pics/brain/.style={code={
+    \draw[ic] (0,0.26)
+      .. controls (-0.22,0.26) and (-0.28,0.08) .. (-0.20,-0.02)
+      .. controls (-0.30,-0.10) and (-0.20,-0.28) .. (-0.05,-0.22)
+      .. controls (0.0,-0.30) and (0.0,-0.30) .. (0.05,-0.22)
+      .. controls (0.20,-0.28) and (0.30,-0.10) .. (0.20,-0.02)
+      .. controls (0.28,0.08) and (0.22,0.26) .. (0,0.26) -- cycle;
+    \draw[ic] (0,0.26) -- (0,-0.24);
+    \draw[ic] (-0.10,0.12) .. controls (-0.02,0.10) and (-0.02,0.0) .. (-0.10,-0.04);
+    \draw[ic] (0.10,0.12) .. controls (0.02,0.10) and (0.02,0.0) .. (0.10,-0.04);
+  }},
+  pics/book/.style={code={
+    \draw[ic] (0,-0.16) .. controls (-0.10,-0.24) and (-0.24,-0.20) .. (-0.26,-0.16)
+      -- (-0.26,0.16) .. controls (-0.20,0.12) and (-0.06,0.10) .. (0,0.18);
+    \draw[ic] (0,-0.16) .. controls (0.10,-0.24) and (0.24,-0.20) .. (0.26,-0.16)
+      -- (0.26,0.16) .. controls (0.20,0.12) and (0.06,0.10) .. (0,0.18);
+    \draw[ic] (0,0.18) -- (0,-0.16);
+  }},
+  pics/graph/.style={code={
+    \draw[ic] (-0.30,0) -- (0.30,0);
+    \draw[ic] (0,0) -- (0,0.20);
+    \foreach \x in {-0.30,-0.10,0.10,0.30}{ \fill (\x,0) circle (0.035); \draw[ic] (\x,0) circle (0.035);}
+    \fill (0,0.20) circle (0.035); \draw[ic] (0,0.20) circle (0.035);
+  }},
+  pics/repo/.style={code={
+    \draw[ic] (-0.10,0.26) -- (-0.10,-0.26);
+    \foreach \y in {0.20,-0.04,-0.20}{ \fill (-0.10,\y) circle (0.05); \draw[ic](-0.10,\y) circle (0.05);}
+    \draw[ic] (-0.10,-0.04) .. controls (0.06,-0.04) and (0.16,0.04) .. (0.16,0.16);
+    \fill (0.16,0.20) circle (0.05); \draw[ic] (0.16,0.20) circle (0.05);
+  }},
+}
+%%%%%%%%%
+
+
+%% %\usepackage{pgf-umlsd} % for flow diagram
+%% \usetikzlibrary{calc}
+%% \usetikzlibrary{shapes.geometric}
+%% \usetikzlibrary{decorations.pathreplacing}
+%% \usetikzlibrary{positioning}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,fill=black,text=white,inner
+            sep=0.4pt] (char) {\small #1};}}
+
+%% %%%%%%%%%% CHECKMARKS
+
+
+%% %%%%%%%% CONCLUDING BOXES
+\usepackage[framemethod=tikz]{mdframed}
+\mdfdefinestyle{mpdframe}{
+   frametitlebackgroundcolor   =black!15,
+    frametitlerule              =true,
+    roundcorner                 =3pt,
+    middlelinewidth             =1pt,
+    skipabove                   =\topskip,
+    skipbelow                   =\topskip,
+    innermargin                 =0.1cm, % smaller makes box bigger
+    outermargin                 =0.1cm,
+    innerleftmargin             =0.1cm,
+    innerrightmargin            =0cm,
+    innertopmargin              =0.1cm,
+    innerbottommargin           =0.1cm,
+    align=center   
+}
+
+%%%%%%%%%% CODE and MACROS
+
+%\input{defs-code}
+%% \input{defs-logic}
+
+%%%%%%%%%% UNCLASSIFIED
+\newcommand{\Caption}[1]{\caption{#1}}
+\newcommand{\NAtname}{-}
+\newcommand{\specialcell}[2][c]{\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+% Right-aligned special cell for numbers with inline deltas
+\newcommand{\specialcellr}[1]{\begin{tabular}[c]{@{}r@{}}#1\end{tabular}}
+\newcommand{\DefMacro}[2]{%
+   \expandafter\newcommand\csname rmk-#1\endcsname{#2}%
+}
+\newcommand{\UseMacro}[1]{\csname rmk-#1\endcsname}
+
+
+\newcommand{\YC}{\textcolor{blue}{\textbf{+}}} %{$\checkmark$}}
+\newcommand{\NC}{\textcolor{red}{\textbf{-}}} %\textbf{$\times$}}}
+\newcommand{\MC}{\textcolor{magenta}{\textbf{$\pm$}}}
+
+\newcommand{\etal}{et al.}
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{i.e.}
+\newcommand{\Fix}[1]{\textcolor{red}{[#1]}}
+\newcommand{\Fixsd}[1]{\textcolor{purple}{SD:[#1]}}
+\newcommand{\Bren}[1]{\textcolor{teal}{Breno:~[#1]}}
+\newcommand{\Den}[1]{\textcolor{blue}{Denini:~[#1]}}
+
+
+\newcommand{\TODO}[1]{{\color{red}{\bf TODO:} #1}}
+\newcommand{\Comment}[1]{}
+\newcommand{\Boldface}[1]{\textbf{#1}}
+\newcommand{\Space}[1]{}
+\newcommand{\hand}[1]{\textcolor{green}{[#1]}}
+\newcommand{\raw}[1]{\textcolor{red}{#1}}
+\newcommand{\edit}[1]{#1}
+
+\newcommand{\MeanStd}[2]{#1$\pm$#2}
+\newcommand{\MeanStdSec}[2]{#1$\pm$#2 seconds}
+\newcommand{\plus}{$+$}
+
+\newcommand{\MyPara}[1]{\vspace{1pt}\noindent\textbf{#1}.}
+\newcommand{\MyParaOnly}[1]{\noindent\textbf{#1}}
+\newcommand{\MyItPara}[1]{\noindent\textit{#1}.}
+\newcommand{\reducedstrut}{\vrule width 0pt height .9\ht\strutbox depth .9\dp\strutbox\relax}
+%\newcommand{\InputWithSpace}[1]{\bgroup\def\arraystretch{1.1}\input{#1}\egroup}
+\newcommand{\Code}[1]{{\small\ifmmode{\texttt{#1}}\else$\texttt{#1}$\fi}}
+\newcommand{\CodeIn}[1]{{\small\ifmmode{\mathtt{#1}}\else$\mathtt{#1}$\fi}}
+\newcommand{\ColorBack}[1]{%
+  \begingroup \setlength{\fboxsep}{0pt}% \colorbox{purple!20}{\reducedstrut#1\/}% \endgroup
+}
+
+%% % ----------
+%% % THIS BELOW COPIED FROM vkuncak/doc/vmcai09/defs.tex
+\definecolor{gray}{RGB}{211,211,211}
+
+
+
+% Define the TODO command with highlight and margin note
+\newcommand{\todo}[2][normal]{%
+  \ifdefined\showtodos
+    \ifstrequal{#1}{high}{\sethlcolor{red}}{}%
+    \ifstrequal{#1}{normal}{\sethlcolor{yellow}}{}%
+    \ifstrequal{#1}{low}{\sethlcolor{green}}{}%
+    {\hl{\textbf{TODO:} #2}}%
+    \marginpar{\textcolor{red}{\textbf{TODO}}}%
+  \fi
+}
+
+% Control visibility of TODOs with this toggle
+\newif\ifshowtodos
+\showtodostrue  % Set to \showtodosfalse before final submission
+
+
+
+%%%%%%
+
+%%
+%% end of the preamble, start of the body of the document source.
+\setkeys{Gin}{draft=false}
+\renewcommand{\lstlistingname}{Listing}
+\usepackage{tcolorbox}
+\usepackage{multirow}
+\usepackage{placeins}
+\usepackage[hidelinks]{hyperref}
+\usepackage{makecell}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{fvextra}
+\usepackage{microtype}
+\emergencystretch=2em
+\raggedbottom
+
+\newenvironment{packed_itemize}{
+\vspace{-0.1ex}
+\begin{list}{\labelitemi}{\leftmargin=1.7em}
+ \setlength{\itemsep}{0pt} \setlength{\parskip}{0pt} \setlength{\parsep}{0pt} \setlength{\headsep}{0pt} \setlength{\topskip}{0pt} \setlength{\topmargin}{0pt} \setlength{\topsep}{0pt} \setlength{\partopsep}{0pt}
+ }{\end{list}
+\vspace{-0.1ex}
+}
+
+
+\newcommand{\tool}{\texttt{FLAG}}
+\newcommand{\pcount}{\textsc{2}}
+\newcommand{\x}{x\xspace}
+\newcommand{\Contrib}[1]{$\star$#1}
+\newcommand{\sota}{SoTA\xspace}
+
+\newcommand{\repository}{https://github.com}
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\definecolor{codebg}{rgb}{0.95, 0.95, 0.92} % Light background
+\definecolor{keywordcolor}{rgb}{0.0, 0.0, 0.6} % Blue for keywords
+\definecolor{stringcolor}{rgb}{0.58, 0.0, 0.82} % Purple for strings
+\definecolor{commentcolor}{rgb}{0.0, 0.5, 0.0} % Green for comments 
+
+\lstset{
+    language=Go,              % Language
+    backgroundcolor=\color{codebg}, % Background color
+    basicstyle=\ttfamily\small, % Font type and size
+    keywordstyle=\color{keywordcolor}\bfseries, % Style for keywords
+    stringstyle=\color{stringcolor}, % Style for strings
+    commentstyle=\color{commentcolor}\itshape, % Style for comments
+    numbers=left,               % Line numbers on the left
+    numberstyle=\tiny,          % Line number font size
+    stepnumber=1,               % Line numbering step
+    frame=single,               % Frame around the code
+    breaklines=true,            % Line breaking
+    tabsize=2,                  % Tab size
+    showspaces=false,           % Don't display spaces
+    showstringspaces=false,     % Don't display string spaces
+    captionpos=b,               % Caption position (b for bottom)
+    lineskip=1pt,
+    linewidth=1\columnwidth,
+    xleftmargin=13pt,    % Add padding to the left
+    numbersep=5pt,
+    escapeinside={(*@}{@*)}, % Allows inline LaTeX
+}
+
+
+\newcommand{\myparagraph}[1]{\vspace{0.5ex}\noindent \textbf{#1. }}
+
+%% Placeholder for numbers that depend on experiments not yet run.
+%% Grep for \PENDING before submitting -- none must remain.
+\newcommand{\PENDING}[1]{\textcolor{red}{\textbf{[PENDING: #1]}}}
